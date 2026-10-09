@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, viewport-fit=cover"
+        />
+        <meta name="theme-color" content="#0d0c1c" />
+        <title>Yu-Gi-Oh AR | Mago Oscuro</title>
+        <link rel="stylesheet" href="./css/app.css" />
+        <script src="./js/lib/aframe.min.js"></script>
+        <script src="./js/lib/mindar-image-aframe.prod.js"></script>
+        <script defer src="./js/app.js"></script>
+    </head>
+    <body>
+        <div class="interface">
+            <header class="header">
+                <div class="brand">
+                    <div class="eyebrow">YU-GI-OH AR • PROTOTIPO</div>
+                    <h1>MAGO OSCURO <span class="star">✦</span></h1>
+                    <p>Invocación por reconocimiento de carta</p>
+                </div>
+                <button
+                    type="button"
+                    id="help-button"
+                    class="small-button"
+                    aria-label="Abrir instrucciones"
+                >
+                    ¿Cómo usar?
+                </button>
+            </header>
+
+            <div class="footer">
+                <section class="info" aria-live="polite">
+                    <div class="indicator">
+                        <span class="dot"></span
+                        ><span id="status-text"
+                            >Iniciando realidad aumentada...</span
+                        >
+                    </div>
+                    <div class="stats-panel" id="stats-panel">
+                        <div class="monster-name">
+                            MAGO OSCURO <span class="attribute">OSCURIDAD</span>
+                        </div>
+                        <div class="stats-row">
+                            <span>⚔ ATAQUE <b>2500</b></span
+                            ><span>⬡ DEFENSA <b>2100</b></span>
+                        </div>
+                        <div class="footnote">
+                            Carta reconocida · Invocación realizada
+                        </div>
+                    </div>
+                </section>
+                <div class="controls">
+                    <button
+                        type="button"
+                        id="attack-button"
+                        class="attack"
+                        disabled
+                    >
+                        ✦ Ataque mágico
+                    </button>
+                    <span class="help-caption">Enfoca la carta completa</span>
+                </div>
+            </div>
+        </div>
+
+        <div
+            id="help-dialog"
+            class="dialog-cover"
+            role="dialog"
+            aria-label="Instrucciones"
+            aria-modal="true"
+        >
+            <div class="dialog">
+                <h2>Invoca al Mago Oscuro 🪄</h2>
+                <p><b>1.</b> Permite el acceso a la cámara.</p>
+                <p>
+                    <b>2.</b> Coloca tu carta física del
+                    <b>Mago Oscuro</b> sobre una superficie iluminada y enfócala
+                    sin reflejos.
+                </p>
+                <p>
+                    <b>3.</b> Verás su modelo 3D sobre la carta. Muévela
+                    despacio para comprobar el seguimiento.
+                </p>
+                <p>
+                    <b>4.</b> Pulsa <b>Ataque mágico</b> para probar el
+                    movimiento y el efecto visual. Todavía no calcula daño.
+                </p>
+                <p>
+                    En laptop abre esta página mediante
+                    <b>http://localhost:8000/</b>. En Android usa una web
+                    publicada en <b>HTTPS</b>.
+                </p>
+                <p class="credits">
+                    Modelo aportado por el usuario, autor
+                    <a
+                        href="https://sketchfab.com/medothegeek"
+                        target="_blank"
+                        rel="noopener"
+                        >medothegeek</a
+                    >, licencia
+                    <a
+                        href="https://creativecommons.org/licenses/by/4.0/"
+                        target="_blank"
+                        rel="noopener"
+                        >CC BY 4.0</a
+                    >. Se ha normalizado su escala para AR.
+                </p>
+                <button type="button" id="close-help" class="small-button">
+                    Entendido
+                </button>
+            </div>
+        </div>
+
+        <a-scene
+            mindar-image="imageTargetSrc: ./targets.mind; uiScanning: no; autoStart: true;"
+            renderer="colorManagement: true; physicallyCorrectLights: true; antialias: true"
+            color-space="sRGB"
+            background="transparent: true"
+            vr-mode-ui="enabled: false"
+            device-orientation-permission-ui="enabled: false"
+            embedded
+        >
+            <a-assets timeout="30000">
+                <a-asset-item
+                    id="magician-asset"
+                    src="./assets/mago_oscuro.glb"
+                ></a-asset-item>
+            </a-assets>
+
+            <a-camera
+                position="0 0 0"
+                look-controls="enabled: false"
+            ></a-camera>
+
+            <!-- targetIndex 0: unica carta incluida en targets.mind -->
+            <a-entity id="image-target" mindar-image-target="targetIndex: 0">
+                <a-circle
+                    position="0 0 0.004"
+                    radius="0.29"
+                    color="#602cbb"
+                    opacity="0.24"
+                    material="transparent: true; side: double"
+                ></a-circle>
+                <a-ring
+                    position="0 0 0.008"
+                    radius-inner="0.30"
+                    radius-outer="0.319"
+                    color="#bf7cff"
+                    opacity="0.85"
+                    material="transparent: true; side: double"
+                    animation="property: rotation; from: 0 0 0; to: 0 0 360; dur: 10000; loop: true; easing: linear"
+                ></a-ring>
+
+                <!-- Giro 90° en X para que el personaje se levante del plano de la carta. -->
+                <a-entity
+                    id="upright-model"
+                    position="0 0 0.018"
+                    rotation="90 0 0"
+                >
+                    <a-entity id="attack-rig" position="0 0 0">
+                        <a-entity
+                            id="idle-rig"
+                            animation="property: position; from: 0 0 0; to: 0 0.012 0; dur: 1800; dir: alternate; loop: true; easing: easeInOutSine"
+                        >
+                            <a-gltf-model
+                                id="magician-model"
+                                src="#magician-asset"
+                                play-idle-animation
+                            ></a-gltf-model>
+                        </a-entity>
+                    </a-entity>
+                </a-entity>
+
+                <!-- Destello de ataque colocado sobre el plano de la carta. -->
+                <a-ring
+                    id="attack-effect"
+                    visible="false"
+                    position="0 0 0.055"
+                    radius-inner="0.16"
+                    radius-outer="0.19"
+                    opacity="0.9"
+                    color="#e9bdff"
+                    material="transparent: true; side: double"
+                ></a-ring>
+                <a-text
+                    value="MAGO OSCURO | ATK 2500 | DEF 2100"
+                    position="0 -0.49 0.015"
+                    width="1.35"
+                    align="center"
+                    anchor="center"
+                    color="#fff1ff"
+                    shader="msdf"
+                    font="./assets/fonts/Roboto-msdf.json"
+                ></a-text>
+            </a-entity>
+        </a-scene>
+    </body>
+</html>
